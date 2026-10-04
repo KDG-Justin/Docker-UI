@@ -1,78 +1,45 @@
-# React + TypeScript + Vite
+# Docker Management Dashboard - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, responsive, and user-friendly web interface built with React, TypeScript, and Tailwind CSS. This application allows users to monitor and manage local Docker resources (Containers, Images, Volumes, and Networks) through a clean dashboard, addressing common CLI pain points like dependency conflicts during resource cleanup.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠️ Tech Stack
 
-## React Compiler
+* **Framework:** [React 18+](https://react.dev/)
+* **Build Tool:** [Vite](https://vitejs.dev/)
+* **Language:** [TypeScript](https://www.typescriptlang.org/)
+* **Styling:** [Tailwind CSS v4](https://tailwindcss.com/)
+* **Routing:** [React Router v6](https://reactrouter.com/)
+* **Data Fetching & State Management:** [TanStack Query v5](https://tanstack.com/query/latest) (React Query)
+* **HTTP Client:** [Axios](https://axios-http.com/)
+* **Icons:** [Lucide React](https://lucide.dev/)
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+---
 
-Note: This will impact Vite dev & build performances.
-You can also try [the experimental native React Compiler support in plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md#rust-react-compiler) by using `compiler: true` in the plugin options instead of using the Babel plugin.
+## 🚀 Key Features
 
-## Expanding the ESLint configuration
+* **Container Management:** View running and stopped containers, inspect details, stream live logs, and execute start/stop/remove actions.
+* **Image Management:** List images, inspect tags and sizes, and safely clean up unused/dangling images.
+* **Volume & Network Control:** Visual Overview of attached volumes and networks.
+* **Dependency Protection:** Visual warnings and smart deletion routines to prevent errors when removing images, volumes, or networks that are still bound to active containers.
+* **Real-time Updates:** Automatic polling and cache invalidation via React Query for near real-time status monitoring.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 📋 Prerequisites
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+Ensure you have the following set up before starting the frontend:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. **[Node.js](https://nodejs.org/)** (v18 or higher) & `npm`
+2. **Docker Dashboard Backend:** The Express/TypeScript API service must be running locally on `http://localhost:3000`.
 
-```
+---
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+## 📦 Setup
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```
+1. **Navigate to the frontend project directory:**
+   ```bash
+   cd docker-frontend
+   npm install
+   npm run dev
