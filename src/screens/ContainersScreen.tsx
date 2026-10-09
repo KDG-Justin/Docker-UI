@@ -1,8 +1,70 @@
+import { useState } from "react";
 import { useContainers } from "../hooks/useContainers";
-import { Play, Square, Info, Terminal, RefreshCw } from "lucide-react";
+import {
+  Play,
+  Square,
+  Info,
+  Terminal,
+  RefreshCw,
+  Trash2,
+  Loader2,
+} from "lucide-react";
+import { DeleteConfirmationModal } from "../components/container/DeleteConformationModal";
 
 export function ContainersScreen() {
-  const { containers, isLoading, isError } = useContainers();
+  const [activeActionId, setActiveActionId] = useState<string>("");
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [targetContainer, setTargetContainer] = useState<{ id: string; name: string } | null>();
+  const {
+    containers,
+    isLoading,
+    isError,
+    startContainer,
+    stopContainer,
+    removeContainer,
+  } = useContainers();
+
+  const handleStart = async (id: string) => {
+    try {
+      setActiveActionId(id);
+      await startContainer(id);
+    } catch (err) {
+      console.error("Failed to start container:", err);
+    } finally {
+      setActiveActionId("");
+    }
+  };
+
+  const handleStop = async (id: string) => {
+    try {
+      setActiveActionId(id);
+      await stopContainer(id);
+    } catch (err) {
+      console.error("Failed to stop container:", err);
+    } finally {
+      setActiveActionId("");
+    }
+  };
+
+  const openDeleteModal = (id: string, name: string) => {
+    setTargetContainer({ id, name });
+    setDeleteModalOpen(true);
+  };
+
+  const handleRemove = async () => {
+    if (!targetContainer) return;
+
+    try {
+      setActiveActionId(targetContainer.id);
+      await removeContainer(targetContainer.id);
+      setDeleteModalOpen(false); 
+      setTargetContainer(null);
+    } catch (err) {
+      console.error('Failed to remove container:', err);
+    } finally {
+      setActiveActionId('');
+    }
+  };
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
@@ -15,7 +77,6 @@ export function ContainersScreen() {
         </div>
       </div>
 
-      {/* Loading */}
       {isLoading && (
         <div className="flex justify-center items-center py-16 text-[#B0E4CC]">
           <RefreshCw className="size-8 animate-spin mr-3" />
@@ -23,7 +84,6 @@ export function ContainersScreen() {
         </div>
       )}
 
-      {/* Error */}
       {isError && (
         <div className="p-4 bg-red-900/40 border border-red-500/50 rounded-lg text-red-200">
           <p className="font-semibold">Error with getting containers:</p>
@@ -31,14 +91,12 @@ export function ContainersScreen() {
         </div>
       )}
 
-      {/* geenc containrs */}
       {!isLoading && !isError && containers?.length === 0 && (
         <div className="text-center py-12 border border-[#408A71]/30 rounded-xl bg-[#285A48]/20">
           <p className="text-gray-300">No containers found.</p>
         </div>
       )}
 
-      {/* wel containers */}
       {!isLoading && !isError && containers && containers.length > 0 && (
         <div className="overflow-hidden rounded-xl border border-[#408A71]/40 bg-[#285A48]/30 backdrop-blur-sm">
           <table className="w-full text-left text-sm text-gray-200">
@@ -55,6 +113,7 @@ export function ContainersScreen() {
             <tbody className="divide-y divide-[#408A71]/20">
               {containers.map((container) => {
                 const isRunning = container.state === "running";
+                const isProcessing = activeActionId === container.id;
 
                 return (
                   <tr
@@ -112,33 +171,56 @@ export function ContainersScreen() {
                     {/* action buttons */}
                     <td className="px-6 py-4 whitespace-nowrap text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {isRunning ? (
-                          <button
-                            title="Stop container"
-                            className="p-2 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white transition-colors"
-                          >
-                            <Square className="size-4" />
-                          </button>
+                        {/* Loading Spinner during mutation */}
+                        {isProcessing ? (
+                          <div className="p-2 text-[#B0E4CC]">
+                            <Loader2 className="size-4 animate-spin" />
+                          </div>
                         ) : (
-                          <button
-                            title="Start container"
-                            className="p-2 rounded-lg bg-[#B0E4CC] text-[#091413] hover:bg-emerald-300 font-bold transition-colors"
-                          >
-                            <Play className="size-4 fill-current" />
-                          </button>
+                          <>
+                            {isRunning ? (
+                              <button
+                                onClick={() => handleStop(container.id)}
+                                title="Stop container"
+                                className="p-2 rounded-lg bg-rose-500/20 text-rose-300 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
+                              >
+                                <Square className="size-4" />
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => handleStart(container.id)}
+                                title="Start container"
+                                className="p-2 rounded-lg bg-[#B0E4CC] text-[#091413] hover:bg-emerald-300 font-bold transition-colors cursor-pointer"
+                              >
+                                <Play className="size-4 fill-current" />
+                              </button>
+                            )}
+
+                            {/* Only for stopped container */}
+                            {!isRunning && (
+                              <button
+                                onClick={() =>
+                                  openDeleteModal(container.id, container.name)
+                                }
+                                title="Remove container"
+                                className="p-2 rounded-lg bg-rose-900/40 text-rose-300 hover:bg-rose-600 hover:text-white transition-colors cursor-pointer"
+                              >
+                                <Trash2 className="size-4" />
+                              </button>
+                            )}
+                          </>
                         )}
 
                         <button
-                          title="Logs"
-                          className="p-2 rounded-lg bg-[#408A71]/40 text-gray-200 hover:bg-[#408A71] hover:text-white transition-colors"
+                          title="View logs"
+                          className="p-2 rounded-lg bg-[#408A71]/40 text-gray-200 hover:bg-[#408A71] hover:text-white transition-colors cursor-pointer"
                         >
                           <Terminal className="size-4" />
                         </button>
 
-                        {/* Info / Inspect Knop */}
                         <button
                           title="Inspect details"
-                          className="p-2 rounded-lg bg-[#408A71]/40 text-gray-200 hover:bg-[#408A71] hover:text-white transition-colors"
+                          className="p-2 rounded-lg bg-[#408A71]/40 text-gray-200 hover:bg-[#408A71] hover:text-white transition-colors cursor-pointer"
                         >
                           <Info className="size-4" />
                         </button>
@@ -151,6 +233,16 @@ export function ContainersScreen() {
           </table>
         </div>
       )}
+      <DeleteConfirmationModal
+        isOpen={deleteModalOpen}
+        containerName={targetContainer?.name || ''}
+        onClose={() => {
+          setDeleteModalOpen(false);
+          setTargetContainer(null);
+        }}
+        onConfirm={handleRemove}
+        isDeleting={activeActionId === targetContainer?.id}
+      />
     </div>
   );
 }

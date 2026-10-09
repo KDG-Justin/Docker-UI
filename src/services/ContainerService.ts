@@ -25,3 +25,15 @@ export async function getContainers(){
     throw error;
   }
 }
+
+export async function startContainer(id: string) : Promise<void> {
+  await axios.post(`${API_BASE_URL}/containers/${id}/start`);
+}
+
+export async function stopContainer(id: string) : Promise<void>{
+  await axios.post(`${API_BASE_URL}/containers/${id}/stop`);
+}
+
+export async function removeContainer(id: string): Promise<void> {
+  await axios.delete(`${API_BASE_URL}/containers/${id}`);
+}
